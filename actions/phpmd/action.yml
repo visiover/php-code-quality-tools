@@ -1,0 +1,26 @@
+# https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-run-steps-actions
+# https://getcomposer.org/doc/03-cli.md#install-i
+
+name: "Run mess detector"
+
+description: "Checking code base with mess detector"
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: "Copy phpmd.ruleset.xml if not exist"
+      run: "cp -n ${{ github.action_path }}/phpmd.ruleset.xml ./phpmd.ruleset.xml"
+      shell: "bash"
+
+    - name: Setup PHP environment
+      uses: shivammathur/setup-php@v2
+      with:
+        coverage: none
+        tools: phpmd
+
+    - name: Run PHPMD
+      shell: "bash"
+      run: phpmd . github phpmd.ruleset.xml --exclude 'tests/*,vendor/*'

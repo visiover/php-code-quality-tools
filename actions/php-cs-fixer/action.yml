@@ -1,0 +1,25 @@
+# https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-run-steps-actions
+# https://getcomposer.org/doc/03-cli.md#install-i
+
+name: "Run PHP-CS-FIXER"
+description: "Automatically fix your code styling with PHP-CS-FIXER"
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: "Copy .php-cs-fixer.php if not exist"
+      run: "cp -n ${{ github.action_path }}/.php-cs-fixer.php ./.php-cs-fixer.php"
+      shell: "bash"
+
+    - name: Run php-cs-fixer
+      shell: "bash"
+      run: mkdir -p .build/php-cs-fixer && ./vendor/bin/php-cs-fixer fix --diff --verbose
+
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Apply php-cs-fixer fixes
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
